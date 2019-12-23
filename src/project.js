@@ -1,9 +1,10 @@
 const fs = require("fs");
-const path = require("path");
 const empty = require("empty-folder");
 const dir = process.env.mode == "dev" ? "./tmp" : "./";
 const { colorMap: cm } = require("./utils/utils");
 const confirmQuestion = require("./../index");
+
+let complete = false;
 
 const makeHTML = (title, modules) => {
   const stream = fs.createWriteStream(`${dir}/index.html`);
@@ -29,7 +30,7 @@ const makeHTML = (title, modules) => {
 
 </html>`);
     stream.end();
-    resolve("html done.");
+    stream.on("finish", () => resolve());
   });
 };
 
@@ -75,8 +76,9 @@ $breakpoint-miniscule: 961px;
   width: 100vw;
 }
 `);
+
     defStream.end();
-    resolve("css done.");
+    defStream.on("finish", () => resolve());
   });
 };
 
@@ -90,8 +92,9 @@ const makeJS = modules => {
 
   return new Promise((resolve, _reject) => {
     stream.write(`console.log("hello from main.mjs!");`);
+
     stream.end();
-    resolve("js done.");
+    stream.on("finish", () => resolve());
   });
 };
 
@@ -106,6 +109,7 @@ module.exports.makeProject = async options => {
       process.stdout.write(
         "\r" + bar[x++] + "  creating project ... " + status
       );
+
       process.stdout.write(cm.reset);
       if (x == bar.length - 1) x = 0;
     }, 100);
@@ -121,24 +125,22 @@ module.exports.makeProject = async options => {
     defaultsName: defaults
   } = options;
 
-  // load configured files into directory
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-
   return new Promise((resolve, reject) => {
+    // load configured files into directory
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+
     // build html / css / js files
-    [
+    Promise.all([
       makeHTML(title, modules),
       makeCSS(css, vars, defaults),
       makeJS(modules)
-    ].forEach((p, i) => {
-      p.then(r => {
-        status = `${i > 2 ? r : "all done!"}`;
-
-        if (i == 2) resolve();
-      });
-    });
+    ])
+      .then(() => {
+        status = "all done!";
+      })
+      .then(() => setTimeout(() => resolve(), 1000));
   });
 };
 
