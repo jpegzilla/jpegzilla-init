@@ -1,0 +1,11 @@
+# node modules
+node_modules/
+
+# random stuff
+notes.md
+
+# temporary files
+tmp
+
+# environment variables
+.env

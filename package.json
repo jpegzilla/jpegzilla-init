@@ -1,0 +1,23 @@
+{
+  "name": "jpegzilla-init",
+  "version": "1.0.0",
+  "description": "a simple cli for setting up web projects the way I like to do it",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "dev": "nodemon ./index.js",
+    "devi": "nodemon --inspect ./index.js",
+    "test": "mocha ./test/index.test.js"
+  },
+  "author": "jpegzilla",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "empty-folder": "^2.0.3"
+  }
+}
