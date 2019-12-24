@@ -69,6 +69,7 @@ $breakpoint-miniscule: 961px;
     defStream.write(`* {
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
 }
 
 :root {
