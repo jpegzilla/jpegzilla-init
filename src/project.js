@@ -66,7 +66,7 @@ $breakpoint-miniscule: 961px;
 `);
     varStream.end();
 
-    defStream.write(`{
+    defStream.write(`* {
   box-sizing: border-box;
   margin: 0;
 }
