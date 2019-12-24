@@ -1,6 +1,6 @@
 {
   "name": "jpegzilla-init",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "a simple cli for setting up web projects the way I like to do it",
   "main": "index.js",
   "scripts": {
