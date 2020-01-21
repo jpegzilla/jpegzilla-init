@@ -225,9 +225,9 @@ $breakpoint-miniscule: 961px`);
       varStream.end();
 
       defStream.write(`*
-box-sizing: border-box
-margin: 0
-padding: 0
+  box-sizing: border-box
+  margin: 0
+  padding: 0
 
 \\:root
   font-size: 16px
@@ -239,19 +239,105 @@ padding: 0
   }
 };
 
-const makeComponents = () => {
-  const jsDir = `${dir}/src/components`;
-  if (!fs.existsSync(jsDir)) fs.mkdirSync(jsDir);
+const makeJS = () => {
+  const compDir = `${allDirs.components}`;
+  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir);
 
-  const stream = fs.createWriteStream(
-    `${jsDir}/main.${modules ? "mjs" : "js"}`
-  );
+  const compStream = fs.createWriteStream(`${compDir}/App.js`);
+
+  const indexStream = fs.createWriteStream(`${allDirs.src}/index.js`);
 
   return new Promise((resolve, _reject) => {
-    stream.write(`console.log("hello from main.mjs!");`);
+    indexStream.write(`import React from "react";
+import ReactDOM from "react-dom";
+import { App } from "./components/App";
+import "./components/styles/main.min.css";
 
-    stream.end();
-    stream.on("finish", () => resolve());
+ReactDOM.render(<App />, document.getElementById("root"));`);
+
+    indexStream.end();
+
+    compStream.write(`import React from "react";
+
+export const App = () => {
+  return <div>hello world!</div>;
+};`);
+
+    compStream.end();
+    compStream.on("finish", () => resolve());
+  });
+};
+
+const makeTest = () => {
+  const testDir = allDirs.test;
+  const helperDir = allDirs.helpers;
+
+  if (!fs.existsSync(testDir)) fs.mkdirSync(testDir);
+  if (!fs.existsSync(helperDir)) fs.mkdirSync(helperDir);
+
+  const testStream = fs.createWriteStream(`${testDir}/App.test.js`);
+  const domHelperStream = fs.createWriteStream(`${helperDir}/dom.js`);
+  const helperStream = fs.createWriteStream(`${helperDir}/helpers.js`);
+
+  return new Promise((resolve, reject) => {
+    testStream.write(`import { App } from "./../src/components/App";
+
+describe(\`<App /> component -- \${new Date().toLocaleString()}\\r\\n\`, () => {
+  const wrapper = mount(<App />);
+
+  describe("renders correctly", () => {
+    it("renders the correct amount of children", () => {
+      expect(wrapper).to.have.lengthOf(1);
+    });
+  });
+});`);
+
+    testStream.end();
+
+    domHelperStream.write(`import { JSDOM } from "jsdom";
+
+const { window } = new JSDOM("<!doctype html><html><body></body></html>", {
+  url: "http://localhost"
+});
+
+function copyProps(src, target) {
+  const props = Object.getOwnPropertyNames(src)
+    .filter(prop => typeof target[prop] === "undefined")
+    .reduce(
+      (result, prop) => ({
+        ...result,
+        [prop]: Object.getOwnPropertyDescriptor(src, prop)
+      }),
+      {}
+    );
+  Object.defineProperties(target, props);
+}
+
+global.window = window;
+global.document = window.document;
+global.navigator = {
+  userAgent: "node.js"
+};`);
+
+    domHelperStream.end();
+
+    helperStream.write(`import { expect } from "chai";
+import { mount, render, shallow, configure } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+import React from "react";
+import "regenerator-runtime";
+
+configure({ adapter: new Adapter() });
+
+global.React = React;
+global.expect = expect;
+global.mount = mount;
+global.render = render;
+global.shallow = shallow;`);
+
+    helperStream.end();
+
+    helperStream.on("finish", () => resolve());
   });
 };
 
@@ -310,8 +396,9 @@ module.exports.makeReactProject = async options => {
     Promise.all([
       makeHTML(title),
       makeConfigs(),
-      makeCSS(css, vars, defaults)
-      // makeJS(modules)
+      makeCSS(css, vars, defaults),
+      makeJS(),
+      makeTest()
     ])
       .then(() => {
         status = "all done!";
