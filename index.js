@@ -119,13 +119,13 @@ const main = async () => {
     if (typeOfProject === "react") {
       if (!currentArgs.some(e => e.startsWith("-r")))
         makeReactProject(options).then(() => {
-          console.log(`\r\nproject created successfully.`);
+          console.log(`\r\nreact project created successfully.`);
           process.exit();
         });
     } else if (typeOfProject === "vanilla") {
       if (!currentArgs.some(e => e.startsWith("-r")))
         makeVanillaProject(options).then(() => {
-          console.log(`\r\nproject created successfully.`);
+          console.log(`\r\nvanilla project created successfully.`);
           process.exit();
         });
     }
@@ -181,6 +181,11 @@ const main = async () => {
       varsName: "_vars.scss",
       defaultsName: "_defaults.scss"
     };
+
+    makeReactProject(options).then(() => {
+      console.log(`\r\nreact project created successfully.`);
+      process.exit();
+    });
 
     // show results
 
