@@ -82,3 +82,4 @@ the file contents are represented in the /templates folder. note that these file
     -   [ ]  add express
     -   [ ]  add rails
     -   [ ]  add vue
+    -   [ ]  add ruby
