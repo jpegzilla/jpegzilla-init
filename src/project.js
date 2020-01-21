@@ -99,7 +99,7 @@ const makeJS = modules => {
   });
 };
 
-module.exports.makeProject = async options => {
+module.exports.makeVanillaProject = async options => {
   let status = "";
   const loadingSpinner = () => {
     let bar = [".  ", ".. ", "...", " ..", "  .", "   ", "   ", "   "];
@@ -120,7 +120,7 @@ module.exports.makeProject = async options => {
 
   const {
     title,
-    cssOrScss: css,
+    cssOption: css,
     modulesOrNot: modules,
     varsName: vars,
     defaultsName: defaults
@@ -149,7 +149,7 @@ module.exports.destroyProject = async () => {
   const rmdir = () => {
     return new Promise((resolve, _reject) => {
       empty(dir, false, o => {
-        if (o.error) rmdir();
+        if (o.error) throw o.error;
         else if (o.failed.length == 0) resolve();
         else rmdir();
 
@@ -165,9 +165,16 @@ module.exports.destroyProject = async () => {
   const confirm = await Object.values(confirmQuestion)[0]();
 
   if (confirm)
-    rmdir().then(() => {
-      process.exit();
-    });
+    rmdir()
+      .then(() => {
+        process.exit();
+      })
+      .catch(err => {
+        process.stdout.write(cm.fgMagenta);
+        console.log("error:", err);
+        process.stdout.write(cm.reset);
+        process.exit();
+      });
   else {
     console.log("doing nothing.");
     process.exit();
