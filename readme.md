@@ -13,7 +13,7 @@ $ jpegzilla-init
 
 and you'll be prompted to go through the creation process.
 
-there are two other arguments, as well:
+there are other arguments, as well:
 
 ```
 -yes or -Y : initialize project with all default options (no prompts will show)
