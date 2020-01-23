@@ -13,7 +13,7 @@ $ jpegzilla-init
 
 and you'll be prompted to go through the creation process.
 
-there are two other arguments, as well:
+there are other arguments, as well:
 
 ```
 -yes or -Y : initialize project with all default options (no prompts will show)
@@ -35,8 +35,8 @@ root
 │   └── main.mjs
 └── css
     ├── components
-    │   ├── \_defaults.scss
-    │   └── \_vars.scss
+    │   ├── _defaults.scss
+    │   └── _vars.scss
     └── main.scss
 ```
 
@@ -52,8 +52,8 @@ root
 │   ├── components
 │   │   ├── styles
 │   │   │   ├── components
-│   │   │   │   ├── \_defaults.sass
-│   │   │   │   └── \_vars.sass
+│   │   │   │   ├── _defaults.sass
+│   │   │   │   └── _vars.sass
 │   │   │   └── main.sass
 │   │   └── App.js
 │   └── index.js
