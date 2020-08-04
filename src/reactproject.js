@@ -1,377 +1,193 @@
-const fs = require("fs");
-const empty = require("empty-folder");
-const dir = process.env.mode == "dev" ? "./tmp" : "./";
-const { colorMap: cm } = require("./utils/utils");
-const confirmQuestion = require("./../index");
+const fs = require('fs')
+const dir = process.env.mode == 'dev' ? './tmp' : './'
+const { colorMap: cm } = require('./utils/utils')
 
-let complete = false,
-  allDirs;
+const gitignoreFile = require('./../templates/react/gitignore')
+const indexFile = require('./../templates/react/public/index')
+const packageJsonFile = require('./../templates/react/package.json')
+const babelRcFile = require('./../templates/react/babelrc')
+const prettierRcFile = require('./../templates/react/prettierrc')
 
-const makeHTML = (title, modules) => {
-  const stream = fs.createWriteStream(`${allDirs.public}/index.html`);
+const mainScssFile = require('./../templates/react/src/components/styles/main.scss')
+const varsScssFile = require('./../templates/react/src/components/styles/_vars.scss')
+const defaultsScssFile = require('./../templates/react/src/components/styles/_defaults.scss')
+const mainSassFile = require('./../templates/react/src/components/styles/main.sass')
+const defaultsSassFile = require('./../templates/react/src/components/styles/_defaults.sass')
+const varsSassFile = require('./../templates/react/src/components/styles/_vars.sass')
+const mainCssFile = require('./../templates/react/src/components/styles/main.css')
+const defaultsCssFile = require('./../templates/react/src/components/styles/defaults.css')
+const varsCssFile = require('./../templates/react/src/components/styles/vars.css')
+
+const reactIndexFile = require('./../templates/react/src/index')
+const reactAppFile = require('./../templates/react/src/components/App')
+const reactAppTestFile = require('./../templates/react/test/App.test')
+const reactTestDomFile = require('./../templates/react/test/helpers/dom')
+const reactTestHelpersFile = require('./../templates/react/test/helpers/helpers')
+
+let allDirs //, complete = false
+
+const makeHTML = title => {
+  const stream = fs.createWriteStream(`${allDirs.public}/index.html`)
   return new Promise((resolve, _reject) => {
-    stream.write(`<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="description" content="description goes here" />
-  <link rel="stylesheet" href="./css/main.min.css">
-  <title>${title}</title>
-</head>
-
-<body>
-  <main id="root"></main>
-</body>
-
-<script src="./js/main.${modules ? "mjs" : "js"}" ${
-      modules ? 'type="module" ' : ""
-    }charset="utf-8"></script>
-
-</html>`);
-    stream.end();
-    stream.on("finish", () => resolve());
-  });
-};
+    stream.write(indexFile(title))
+    stream.end()
+    stream.on('finish', () => resolve())
+  })
+}
 
 const makeConfigs = () => {
-  const babelStream = fs.createWriteStream(`${allDirs.root}/.babelrc`);
-  const gitignoreStream = fs.createWriteStream(`${allDirs.root}/.gitignore`);
-  const packageJSONStream = fs.createWriteStream(
-    `${allDirs.root}/package.json`
-  );
-
-  return new Promise((resolve, reject) => {
-    gitignoreStream.write(`# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-notes.md
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# lockfiles
-**/*.lock
-*-lock.json`);
-
-    packageJSONStream.write(`{
-  "name": "jpegzilla-init-react",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
-    "es6-promise": "^4.2.8",
-    "isomorphic-fetch": "^2.2.1",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "mocha --require @babel/register --require ./test/helpers/helpers.js --require ./test/helpers/dom.js --require ignore-styles -b -c './test/*.test.js'",
-    "test:watch": "npm run test -- --watch",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%", "not dead", "not op_mini all"
-    ],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
-  },
-  "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
-    "@babel/preset-react": "^7.7.4",
-    "@babel/register": "^7.7.7",
-    "chai": "^4.2.0",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.2",
-    "ignore-styles": "^5.0.1",
-    "jsdom": "^15.2.1",
-    "mocha": "^7.0.0",
-    "react-addons-test-utils": "^15.6.2"
-  }
-}`);
-
-    babelStream.write(`{
-  "presets": [
-    [
-      "@babel/preset-env", {
-        "modules": "auto"
-      }
-    ],
-    "@babel/preset-react"
-  ],
-  "plugins": ["@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"]
-}
-`);
-
-    babelStream.end();
-    babelStream.on("finish", () => resolve());
-  });
-};
-
-const makeCSS = (css, vars, defaults) => {
-  // make the base css directory
-  const cssDir = `${allDirs.styles}`;
-
-  // make the components directory
-  const compDir = `${cssDir}/components`;
-  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir);
-
-  const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`);
-  const varStream = fs.createWriteStream(`${compDir}/${vars}`);
-  const defStream = fs.createWriteStream(`${compDir}/${defaults}`);
-
-  if (css === "scss") {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(`// compile main
-
-@import "./components/defaults";
-@import "./components/vars";`);
-      mainStream.end();
-
-      varStream.write(`$p-xl: 8rem;
-$p-l: 4rem;
-$p-m: 2rem;
-$p-s: 1rem;
-
-$breakpoint-small: 1500px;
-$breakpoint-tiny: 1200px;
-$breakpoint-miniscule: 961px;`);
-      varStream.end();
-
-      defStream.write(`* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  font-size: 16px;
-  width: 100vw;
-}`);
-
-      defStream.end();
-      defStream.on("finish", () => resolve());
-    });
-  } else if (css === "css") {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(`@import "./components/defaults.css";
-@import "./components/vars.css";`);
-      mainStream.end();
-
-      varStream.write(`--breakpoint-small: 1500px;
---breakpoint-tiny: 1200px;
---breakpoint-miniscule: 961px;`);
-      varStream.end();
-
-      defStream.write(`* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  font-size: 16px;
-  width: 100vw;
-}`);
-
-      defStream.end();
-      defStream.on("finish", () => resolve());
-    });
-  } else if (css === "sass") {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(`// compile main
-
-@import "./components/defaults"
-@import "./components/vars"`);
-      mainStream.end();
-
-      varStream.write(`$p-xl: 8rem
-$p-l: 4rem
-$p-m: 2rem
-$p-s: 1rem
-
-$breakpoint-small: 1500px
-$breakpoint-tiny: 1200px
-$breakpoint-miniscule: 961px`);
-      varStream.end();
-
-      defStream.write(`*
-  box-sizing: border-box
-  margin: 0
-  padding: 0
-
-\\:root
-  font-size: 16px
-  width: 100vw`);
-
-      defStream.end();
-      defStream.on("finish", () => resolve());
-    });
-  }
-};
-
-const makeJS = () => {
-  const compDir = `${allDirs.components}`;
-  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir);
-
-  const compStream = fs.createWriteStream(`${compDir}/App.js`);
-
-  const indexStream = fs.createWriteStream(`${allDirs.src}/index.js`);
+  const babelStream = fs.createWriteStream(`${allDirs.root}/.babelrc`)
+  const gitignoreStream = fs.createWriteStream(`${allDirs.root}/.gitignore`)
+  const prettierRcStream = fs.createWriteStream(`${allDirs.root}/.prettierrc`)
+  const packageJSONStream = fs.createWriteStream(`${allDirs.root}/package.json`)
 
   return new Promise((resolve, _reject) => {
-    indexStream.write(`import React from "react";
-import ReactDOM from "react-dom";
-import { App } from "./components/App";
-import "./components/styles/main.min.css";
+    // write .gitignore, package.json, .prettierrc and .babelrc
+    gitignoreStream.write(gitignoreFile)
+    gitignoreStream.end()
 
-ReactDOM.render(<App />, document.getElementById("root"));`);
+    prettierRcStream.write(prettierRcFile)
+    prettierRcStream.end()
 
-    indexStream.end();
+    packageJSONStream.write(packageJsonFile)
+    packageJSONStream.end()
 
-    compStream.write(`import React from "react";
+    babelStream.write(babelRcFile)
+    babelStream.end()
 
-export const App = () => {
-  return <div>hello world!</div>;
-};`);
-
-    compStream.end();
-    compStream.on("finish", () => resolve());
-  });
-};
-
-const makeTest = () => {
-  const testDir = allDirs.test;
-  const helperDir = allDirs.helpers;
-
-  if (!fs.existsSync(testDir)) fs.mkdirSync(testDir);
-  if (!fs.existsSync(helperDir)) fs.mkdirSync(helperDir);
-
-  const testStream = fs.createWriteStream(`${testDir}/App.test.js`);
-  const domHelperStream = fs.createWriteStream(`${helperDir}/dom.js`);
-  const helperStream = fs.createWriteStream(`${helperDir}/helpers.js`);
-
-  return new Promise((resolve, reject) => {
-    testStream.write(`import { App } from "./../src/components/App";
-
-describe(\`<App /> component -- \${new Date().toLocaleString()}\\r\\n\`, () => {
-  const wrapper = mount(<App />);
-
-  describe("renders correctly", () => {
-    it("renders the correct amount of children", () => {
-      expect(wrapper).to.have.lengthOf(1);
-    });
-  });
-});`);
-
-    testStream.end();
-
-    domHelperStream.write(`import { JSDOM } from "jsdom";
-
-const { window } = new JSDOM("<!doctype html><html><body></body></html>", {
-  url: "http://localhost"
-});
-
-function copyProps(src, target) {
-  const props = Object.getOwnPropertyNames(src)
-    .filter(prop => typeof target[prop] === "undefined")
-    .reduce(
-      (result, prop) => ({
-        ...result,
-        [prop]: Object.getOwnPropertyDescriptor(src, prop)
-      }),
-      {}
-    );
-  Object.defineProperties(target, props);
+    babelStream.on('finish', () => resolve())
+  })
 }
 
-global.window = window;
-global.document = window.document;
-global.navigator = {
-  userAgent: "node.js"
-};`);
+// write all css
+const makeCSS = (css, vars, defaults) => {
+  // make the base css directory
+  const cssDir = `${allDirs.styles}`
 
-    domHelperStream.end();
+  // make the components directory
+  const compDir = `${cssDir}/components`
 
-    helperStream.write(`import { expect } from "chai";
-import { mount, render, shallow, configure } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
-import React from "react";
-import "regenerator-runtime";
+  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
 
-configure({ adapter: new Adapter() });
+  const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`)
+  const varStream = fs.createWriteStream(`${compDir}/${vars}`)
+  const defStream = fs.createWriteStream(`${compDir}/${defaults}`)
 
-global.React = React;
-global.expect = expect;
-global.mount = mount;
-global.render = render;
-global.shallow = shallow;`);
+  if (css === 'scss') {
+    return new Promise((resolve, _reject) => {
+      mainStream.write(mainScssFile)
+      mainStream.end()
 
-    helperStream.end();
+      varStream.write(varsScssFile)
+      varStream.end()
 
-    helperStream.on("finish", () => resolve());
-  });
-};
+      defStream.write(defaultsScssFile)
+      defStream.end()
+
+      defStream.on('finish', () => resolve())
+    })
+  } else if (css === 'css') {
+    return new Promise((resolve, _reject) => {
+      mainStream.write(mainCssFile)
+      mainStream.end()
+
+      varStream.write(varsCssFile)
+      varStream.end()
+
+      defStream.write(defaultsCssFile)
+      defStream.end()
+
+      defStream.on('finish', () => resolve())
+    })
+  } else if (css === 'sass') {
+    return new Promise((resolve, _reject) => {
+      mainStream.write(mainSassFile)
+      mainStream.end()
+
+      varStream.write(varsSassFile)
+      varStream.end()
+
+      defStream.write(defaultsSassFile)
+      defStream.end()
+
+      defStream.on('finish', () => resolve())
+    })
+  }
+}
+
+// write all javascript files
+const makeJS = () => {
+  const compDir = `${allDirs.components}`
+
+  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
+
+  const compStream = fs.createWriteStream(`${compDir}/App.js`)
+  const indexStream = fs.createWriteStream(`${allDirs.src}/index.js`)
+
+  return new Promise((resolve, _reject) => {
+    indexStream.write(reactIndexFile)
+    indexStream.end()
+
+    compStream.write(reactAppFile)
+    compStream.end()
+
+    compStream.on('finish', () => resolve())
+  })
+}
+
+// write all testing-related files
+const makeTest = () => {
+  const testDir = allDirs.test
+  const helperDir = allDirs.helpers
+
+  if (!fs.existsSync(testDir)) fs.mkdirSync(testDir)
+  if (!fs.existsSync(helperDir)) fs.mkdirSync(helperDir)
+
+  const testStream = fs.createWriteStream(`${testDir}/App.test.js`)
+  const domHelperStream = fs.createWriteStream(`${helperDir}/dom.js`)
+  const helperStream = fs.createWriteStream(`${helperDir}/helpers.js`)
+
+  return new Promise((resolve, _reject) => {
+    testStream.write(reactAppTestFile)
+    testStream.end()
+
+    domHelperStream.write(reactTestDomFile)
+    domHelperStream.end()
+
+    helperStream.write(reactTestHelpersFile)
+    helperStream.end()
+
+    helperStream.on('finish', () => resolve())
+  })
+}
 
 module.exports.makeReactProject = async options => {
-  let status = "";
+  let status = ''
   const loadingSpinner = () => {
-    let bar = [".  ", ".. ", "...", " ..", "  .", "   ", "   ", "   "];
-    let x = 0;
+    let bar = ['.  ', '.. ', '...', ' ..', '  .', '   ', '   ', '   ']
+    let x = 0
 
     return setInterval(() => {
-      process.stdout.write(cm.fgMagenta);
-      process.stdout.write(
-        "\r" + bar[x++] + "  creating project ... " + status
-      );
+      process.stdout.write(cm.fgMagenta)
+      process.stdout.write('\r' + bar[x++] + '  creating project ... ' + status)
 
-      process.stdout.write(cm.reset);
-      if (x == bar.length - 1) x = 0;
-    }, 100);
-  };
+      process.stdout.write(cm.reset)
+      if (x == bar.length - 1) x = 0
+    }, 100)
+  }
 
-  loadingSpinner();
+  loadingSpinner()
 
   const {
     title,
     cssOption: css,
     varsName: vars,
-    defaultsName: defaults
-  } = options;
+    defaultsName: defaults,
+  } = options
 
   return new Promise((resolve, reject) => {
     // load configured files into directory
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir)
 
     // make sure all necessary dirs exist for react config
     allDirs = {
@@ -381,14 +197,12 @@ module.exports.makeReactProject = async options => {
       helpers: `${dir}/test/helpers`,
       public: `${dir}/public`,
       components: `${dir}/src/components`,
-      styles: `${dir}/src/components/styles`
-    };
+      styles: `${dir}/src/components/styles`,
+    }
 
     for (let d in allDirs) {
       if (allDirs.hasOwnProperty(d)) {
-        if (!fs.existsSync(allDirs[d])) {
-          fs.mkdirSync(allDirs[d]);
-        }
+        if (!fs.existsSync(allDirs[d])) fs.mkdirSync(allDirs[d])
       }
     }
 
@@ -398,11 +212,11 @@ module.exports.makeReactProject = async options => {
       makeConfigs(),
       makeCSS(css, vars, defaults),
       makeJS(),
-      makeTest()
+      makeTest(),
     ])
       .then(() => {
-        status = "all done!";
+        status = 'all done!'
       })
-      .then(() => setTimeout(() => resolve(), 1000));
-  });
-};
+      .then(() => setTimeout(() => resolve(), 1000))
+  })
+}
