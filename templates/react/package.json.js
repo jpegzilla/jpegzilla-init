@@ -10,9 +10,13 @@ module.exports = `{
     "isomorphic-fetch": "^2.2.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0"
+    "react-scripts": "^3.4.1"
   },
   "scripts": {
+    "style:watch:min": "sass --watch --style=compressed ./src/components/styles/main.sass:./src/components/styles/main.min.css",
+    "swm": "sass --watch --style=compressed ./src/components/styles/main.sass:./src/components/styles/main.min.css",
+    "style:watch": "sass --watch --style=expanded ./src/components/styles/main.sass:./src/components/styles/main.css",
+    "sw": "sass --watch --style=expanded ./src/components/styles/main.sass:./src/components/styles/main.css",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "mocha --require @babel/register --require ./test/helpers/helpers.js --require ./test/helpers/dom.js --require ignore-styles -b -c './test/*.test.js'",
