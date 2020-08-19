@@ -4,32 +4,26 @@ const dir = process.env.mode == "dev" ? "./tmp" : "./";
 const { colorMap: cm } = require("./utils/utils");
 const confirmQuestion = require("./../index");
 
-let complete = false;
+const indexTemplate = require('./../templates/vanilla/index')
+
+const mainScssFile = require('./../templates/react/src/components/styles/main.scss')
+const varsScssFile = require('./../templates/react/src/components/styles/_vars.scss')
+const defaultsScssFile = require('./../templates/react/src/components/styles/_defaults.scss')
+
+const mainSassFile = require('./../templates/react/src/components/styles/main.sass')
+const defaultsSassFile = require('./../templates/react/src/components/styles/_defaults.sass')
+const varsSassFile = require('./../templates/react/src/components/styles/_vars.sass')
+
+const mainCssFile = require('./../templates/react/src/components/styles/main.css')
+const defaultsCssFile = require('./../templates/react/src/components/styles/defaults.css')
+const varsCssFile = require('./../templates/react/src/components/styles/vars.css')
 
 const makeHTML = (title, modules) => {
   const stream = fs.createWriteStream(`${dir}/index.html`);
   return new Promise((resolve, _reject) => {
-    stream.write(`<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="./css/main.min.css">
-  <title>${title}</title>
-</head>
-
-<body>
-
-</body>
-
-<script src="./js/main.${modules ? "mjs" : "js"}" ${
-      modules ? 'type="module" ' : ""
-    }charset="utf-8"></script>
-
-</html>`);
+    stream.write(indexTemplate(title, modules));
     stream.end();
+
     stream.on("finish", () => resolve());
   });
 };
@@ -47,40 +41,29 @@ const makeCSS = (css, vars, defaults) => {
   const varStream = fs.createWriteStream(`${compDir}/${vars}`);
   const defStream = fs.createWriteStream(`${compDir}/${defaults}`);
 
-  return new Promise((resolve, _reject) => {
-    mainStream.write(`// compile main
+  const writeAllCss = (mainFile, varFile, defFile) => {
+    return new Promise((resolve, _reject) => {
+      mainStream.write(mainFile);
+      mainStream.end();
 
-@import "./components/defaults";
-@import "./components/vars";
-`);
-    mainStream.end();
+      varStream.write(varFile);
+      varStream.end();
 
-    varStream.write(`$p-xl: 8rem;
-$p-l: 4rem;
-$p-m: 2rem;
-$p-s: 1rem;
+      defStream.write(defFile);
+      defStream.end();
 
-$breakpoint-small: 1500px;
-$breakpoint-tiny: 1200px;
-$breakpoint-miniscule: 961px;
-`);
-    varStream.end();
+      defStream.on("finish", () => resolve());
+    });
+  }
 
-    defStream.write(`* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  font-size: 16px;
-  width: 100vw;
-}
-`);
-
-    defStream.end();
-    defStream.on("finish", () => resolve());
-  });
+  switch (css) {
+    case 'css':
+      return writeAllCss(mainCssFile, varsCssFile, defaultsCssFile)
+    case 'scss':
+      return writeAllCss(mainScssFile, varsScssFile, defaultsScssFile)
+    case 'sass':
+      return writeAllCss(mainSassFile, varsSassFile, defaultsSassFile)
+  }
 };
 
 const makeJS = modules => {
@@ -92,9 +75,9 @@ const makeJS = modules => {
   );
 
   return new Promise((resolve, _reject) => {
-    stream.write(`console.log("hello from main.mjs!");`);
-
+    stream.write(`console.log("hello from main.${modules ? "mjs" : "js"}!")`);
     stream.end();
+
     stream.on("finish", () => resolve());
   });
 };
