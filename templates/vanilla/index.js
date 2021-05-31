@@ -13,8 +13,8 @@ module.exports = (title, modules) => `<!DOCTYPE html>
 
 </body>
 
-<script src="./js/main.${modules ? "mjs" : "js"}" ${
-  modules ? 'type="module" ' : ""
+<script src="./js/main.${modules ? 'mjs' : 'js'}" ${
+  modules ? 'type="module" ' : ''
 }charset="utf-8"></script>
 
 </html>`

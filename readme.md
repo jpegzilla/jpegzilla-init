@@ -68,18 +68,20 @@ root
 ```
 
 ### individual file contents:
+
 the file contents are represented in the /templates folder. note that these files are simply kept as a reference, and are not dependencies. the /templates folder is not included in the npm package.
 
 ---
 
 ### future features
--   [ ] add service worker prompts
--   [ ] ogp / twitter / ios / seo meta tags
--   [ ] icon meta / manifest / etc. tags for pwas
 
--   [ ] add support for other frameworks:
-    -   [ ]  add handlebars
-    -   [ ]  add express
-    -   [ ]  add rails
-    -   [ ]  add vue
-    -   [ ]  add ruby
+- [ ] add service worker prompts
+- [ ] ogp / twitter / ios / seo meta tags
+- [ ] icon meta / manifest / etc. tags for pwas
+
+- [ ] add support for other frameworks:
+  - [ ] add handlebars
+  - [ ] add express
+  - [ ] add rails
+  - [ ] add vue
+  - [ ] add ruby
