@@ -13,6 +13,7 @@ const {
 
 const { makeVanillaProject, destroyProject } = require('./src/project')
 const { makeReactProject } = require('./src/reactproject')
+const { makeWebComponentProject } = require('./src/webcomponentproject')
 
 // get arguments
 const currentArgs = argsGrinder()
@@ -28,7 +29,7 @@ const typeQuestion = () =>
   new Promise((resolve, reject) => {
     process.stdout.write(cm.fgCyan)
     rl.question(
-      'what type of project (vanilla / react) would you like to make? (default: vanilla): ',
+      'what type of project (vanilla / react / web component) would you like to make? (default: vanilla): ',
       answer => {
         let ans = answer ? answer : 'vanilla'
         process.stdout.write(cm.reset)
@@ -128,6 +129,12 @@ const main = async () => {
           console.log(`\r\nvanilla project created successfully.`)
           process.exit()
         })
+    } else if (typeOfProject === 'web component') {
+      if (!currentArgs.some(e => e.startsWith('-r')))
+        makeWebComponentProject(options).then(() => {
+          console.log(`\r\nweb component project created successfully.`)
+          process.exit()
+        })
     }
 
     // process.stdout.write(cm.fgYellow);
@@ -207,12 +214,50 @@ const main = async () => {
     console.log('\r\n=====')
 
     rl.close()
+  } else if (currentArgs.some(e => e.startsWith('-w'))) {
+    // if "yes to all" argument is passed, set all values to default
+    options = {
+      title: 'index',
+      cssOption: 'scss',
+      modulesOrNot: true,
+      varsName: '_vars.scss',
+      defaultsName: '_defaults.scss',
+    }
+
+    makeWebComponentProject(options).then(() => {
+      console.log(`\r\nweb component project created successfully.`)
+      process.exit()
+    })
+
+    // show results
+
+    console.log('=====')
+    ci('\r\n> options selected.\r\n')
+
+    cb('\t> document title: ')
+    process.stdout.write(`${options.title}\r\n`)
+
+    cb('\t> css or scss: ')
+    process.stdout.write(`${options.cssOption}\r\n`)
+
+    cb('\t> use js native modules: ')
+    process.stdout.write(`${options.modulesOrNot ? 'yes' : 'no'}\r\n`)
+
+    cb('\t> name of css vars file: ')
+    process.stdout.write(`${options.varsName}\r\n`)
+
+    cb('\t> name of css defaults file: ')
+    process.stdout.write(`${options.defaultsName}\r\n`)
+
+    console.log('\r\n=====')
+
+    rl.close()
   } else {
     // get type of project first:
     typeOfProject = await typeQuestion()
 
-    while (!['react', 'vanilla'].includes(typeOfProject.toLowerCase())) {
-      ce('please choose between react and vanilla.')
+    while (!['react', 'vanilla', 'web component'].includes(typeOfProject.toLowerCase())) {
+      ce('please choose between react, vanilla, or web component.')
       typeOfProject = await typeQuestion()
     }
 
@@ -310,6 +355,60 @@ const main = async () => {
       options = {
         title: docTitle,
         cssOption: cssOption,
+        varsName: `${varsName}.${cssOption}`,
+        defaultsName: `${defaultsName}.${cssOption}`,
+      }
+    } else if (typeOfProject === 'web component') {
+      // get answers to questions:
+      docTitle = await titleQuestion()
+      cssOption = await styleQuestion()
+
+      while (!['css', 'scss', 'sass'].includes(cssOption.toLowerCase())) {
+        ce('please choose between scss and css.')
+        cssOption = await styleQuestion()
+      }
+
+      modulesOrNot = await moduleQuestion()
+
+      while (!['yes', 'y', 'n', 'no'].includes(modulesOrNot.toLowerCase())) {
+        ce('please just say yes or no.')
+        modulesOrNot = await moduleQuestion()
+      }
+
+      varsName = await varsQuestion()
+      defaultsName = await defaultsQuestion()
+
+      if (varsName == defaultsName) {
+        ce('please rename your vars file!')
+        varsName = await varsQuestion()
+      }
+
+      // show results
+
+      console.log('=====')
+      ci('\r\n> options selected.\r\n')
+
+      cb('\t> document title: ')
+      process.stdout.write(`${docTitle}\r\n`)
+
+      cb('\t> css or scss: ')
+      process.stdout.write(`${cssOption}\r\n`)
+
+      cb('\t> use js native modules: ')
+      process.stdout.write(`${modulesOrNot}\r\n`)
+
+      cb('\t> name of css vars file: ')
+      process.stdout.write(`${varsName}.${cssOption}\r\n`)
+
+      cb('\t> name of css defaults file: ')
+      process.stdout.write(`${defaultsName}.${cssOption}\r\n`)
+
+      console.log('\r\n=====')
+
+      options = {
+        title: docTitle,
+        cssOption: cssOption,
+        modulesOrNot: modulesOrNot.toLowerCase().startsWith('y') ? true : false,
         varsName: `${varsName}.${cssOption}`,
         defaultsName: `${defaultsName}.${cssOption}`,
       }
