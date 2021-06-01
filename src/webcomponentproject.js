@@ -4,22 +4,24 @@ const dir = process.env.mode == 'dev' ? './tmp' : './'
 const { colorMap: cm } = require('./utils/utils')
 const confirmQuestion = require('./../index')
 
-const indexTemplate = require('./../templates/vanilla/index')
-const componentTemplate = require('./../templates/web-component/component')
-const prettierTemplate = require('./../templates/web-component/prettier')
-const mainJsFile = require('./../templates/web-component/main')
+const indexTemplate = require('./../templates/index')
+const componentTemplate = require('./../templates/src/components/component')
+const prettierTemplate = require('./../templates/prettierrc')
+const mainJsFile = require('./../templates/main-wc')
 
-const mainScssFile = require('./../templates/react/src/components/styles/main.scss')
-const varsScssFile = require('./../templates/react/src/components/styles/_vars.scss')
-const defaultsScssFile = require('./../templates/react/src/components/styles/_defaults.scss')
+const mainScssFile = require('./../templates/src/components/styles/main.scss')
+const varsScssFile = require('./../templates/src/components/styles/_vars.scss')
+const defaultsScssFile = require('./../templates/src/components/styles/_defaults.scss')
 
-const mainSassFile = require('./../templates/react/src/components/styles/main.sass')
-const defaultsSassFile = require('./../templates/react/src/components/styles/_defaults.sass')
-const varsSassFile = require('./../templates/react/src/components/styles/_vars.sass')
+const mainSassFile = require('./../templates/src/components/styles/main.sass')
+const defaultsSassFile = require('./../templates/src/components/styles/_defaults.sass')
+const varsSassFile = require('./../templates/src/components/styles/_vars.sass')
 
-const mainCssFile = require('./../templates/react/src/components/styles/main.css')
-const defaultsCssFile = require('./../templates/react/src/components/styles/defaults.css')
-const varsCssFile = require('./../templates/react/src/components/styles/vars.css')
+const mainCssFile = require('./../templates/src/components/styles/main.css')
+const defaultsCssFile = require('./../templates/src/components/styles/defaults.css')
+const varsCssFile = require('./../templates/src/components/styles/vars.css')
+
+const mainMinCssFile = require('./../templates/src/components/styles/main.min.css')
 
 const makePrettier = () => {
   const stream = fs.createWriteStream(`${dir}/.prettierrc`)
@@ -51,6 +53,7 @@ const makeCSS = (css, vars, defaults) => {
   if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
 
   const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`)
+  const mainMinStream = fs.createWriteStream(`${cssDir}/main.min.css`)
   const varStream = fs.createWriteStream(`${compDir}/${vars}`)
   const defStream = fs.createWriteStream(`${compDir}/${defaults}`)
 
@@ -58,6 +61,9 @@ const makeCSS = (css, vars, defaults) => {
     return new Promise((resolve, _reject) => {
       mainStream.write(mainFile)
       mainStream.end()
+
+      mainMinStream.write(mainMinCssFile)
+      mainMinStream.end()
 
       varStream.write(varFile)
       varStream.end()

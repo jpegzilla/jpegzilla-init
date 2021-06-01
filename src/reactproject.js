@@ -2,27 +2,28 @@ const fs = require('fs')
 const dir = process.env.mode == 'dev' ? './tmp' : './'
 const { colorMap: cm } = require('./utils/utils')
 
-const gitignoreFile = require('./../templates/react/gitignore')
-const indexFile = require('./../templates/react/public/index')
-const packageJsonFile = require('./../templates/react/package.json')
-const babelRcFile = require('./../templates/react/babelrc')
-const prettierRcFile = require('./../templates/react/prettierrc')
+const gitignoreFile = require('./../templates/gitignore')
+const indexFile = require('./../templates/public/index')
+const packageJsonFile = require('./../templates/package.json')
+const babelRcFile = require('./../templates/babelrc')
+const prettierRcFile = require('./../templates/prettierrc')
 
-const mainScssFile = require('./../templates/react/src/components/styles/main.scss')
-const varsScssFile = require('./../templates/react/src/components/styles/_vars.scss')
-const defaultsScssFile = require('./../templates/react/src/components/styles/_defaults.scss')
-const mainSassFile = require('./../templates/react/src/components/styles/main.sass')
-const defaultsSassFile = require('./../templates/react/src/components/styles/_defaults.sass')
-const varsSassFile = require('./../templates/react/src/components/styles/_vars.sass')
-const mainCssFile = require('./../templates/react/src/components/styles/main.css')
-const defaultsCssFile = require('./../templates/react/src/components/styles/defaults.css')
-const varsCssFile = require('./../templates/react/src/components/styles/vars.css')
+const mainScssFile = require('./../templates/src/components/styles/main.scss')
+const varsScssFile = require('./../templates/src/components/styles/_vars.scss')
+const defaultsScssFile = require('./../templates/src/components/styles/_defaults.scss')
+const mainSassFile = require('./../templates/src/components/styles/main.sass')
+const defaultsSassFile = require('./../templates/src/components/styles/_defaults.sass')
+const varsSassFile = require('./../templates/src/components/styles/_vars.sass')
+const mainCssFile = require('./../templates/src/components/styles/main.css')
+const defaultsCssFile = require('./../templates/src/components/styles/defaults.css')
+const varsCssFile = require('./../templates/src/components/styles/vars.css')
+const mainMinCssFile = require('./../templates/src/components/styles/main.min.css')
 
-const reactIndexFile = require('./../templates/react/src/index')
-const reactAppFile = require('./../templates/react/src/components/App')
-const reactAppTestFile = require('./../templates/react/test/App.test')
-const reactTestDomFile = require('./../templates/react/test/helpers/dom')
-const reactTestHelpersFile = require('./../templates/react/test/helpers/helpers')
+const reactIndexFile = require('./../templates/src/index-react')
+const reactAppFile = require('./../templates/src/components/App')
+const reactAppTestFile = require('./../templates/test/App.test')
+const reactTestDomFile = require('./../templates/test/helpers/dom')
+const reactTestHelpersFile = require('./../templates/test/helpers/helpers')
 
 let allDirs //, complete = false
 
@@ -70,6 +71,7 @@ const makeCSS = (css, vars, defaults) => {
   if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
 
   const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`)
+  const mainMinStream = fs.createWriteStream(`${cssDir}/main.min.css`)
   const varStream = fs.createWriteStream(`${compDir}/${vars}`)
   const defStream = fs.createWriteStream(`${compDir}/${defaults}`)
 
@@ -77,6 +79,9 @@ const makeCSS = (css, vars, defaults) => {
     return new Promise((resolve, _reject) => {
       mainStream.write(mainScssFile)
       mainStream.end()
+
+      mainMinStream.write(mainMinCssFile)
+      mainMinStream.end()
 
       varStream.write(varsScssFile)
       varStream.end()
