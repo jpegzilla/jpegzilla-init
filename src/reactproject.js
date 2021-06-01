@@ -191,6 +191,6 @@ module.exports.makeReactProject = async options => {
       .then(() => {
         status = 'all done!'
         resolve()
-      }))
+      })
   })
 }
