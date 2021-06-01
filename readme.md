@@ -19,6 +19,7 @@ there are other arguments, as well:
 -yes or -Y : initialize project with all default options (no prompts will show)
 -reset or -R : empties current directory. prompts for confirmation.
 -react : creates react project with default options (no prompts will show)
+-w : creates web component project with default options (no prompts)
 ```
 
 ### what files this will create:
@@ -65,6 +66,25 @@ root
 ├── .babelrc
 ├── .gitignore
 └── package.json
+```
+
+#### web component:
+
+generates this (with some variation depending on your choices):
+
+```
+root
+├── css
+│   ├── components
+│   │   ├── _defaults.sass
+│   │   └── _var.sass
+│   └── main.sass
+├── js
+│   ├── components
+│   │   └── component.mjs
+│   └── main.mjs
+├── index.html
+└── .prettierrc
 ```
 
 ### individual file contents:
