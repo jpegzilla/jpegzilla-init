@@ -1,6 +1,6 @@
 {
   "name": "jpegzilla-init",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "a simple cli for setting up web projects the way I like to do it",
   "main": "index.js",
   "scripts": {
@@ -20,5 +20,6 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "empty-folder": "^2.0.3"
-  }
+  },
+  "keywords": ["boilerplate"]
 }
