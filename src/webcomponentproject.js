@@ -7,6 +7,7 @@ const confirmQuestion = require('./../index')
 const indexTemplate = require('./../templates/vanilla/index')
 const componentTemplate = require('./../templates/web-component/component')
 const prettierTemplate = require('./../templates/web-component/prettier')
+const mainJsFile = require('./../templates/web-component/main')
 
 const mainScssFile = require('./../templates/react/src/components/styles/main.scss')
 const varsScssFile = require('./../templates/react/src/components/styles/_vars.scss')
@@ -88,7 +89,7 @@ const makeJS = modules => {
   const compStream = fs.createWriteStream(`${jsCompDir}/component.${modules ? 'mjs' : 'js'}`)
 
   return new Promise((resolve, _reject) => {
-    stream.write(`console.log("hello from main.${modules ? 'mjs' : 'js'}!")`)
+    stream.write(mainJsFile)
     stream.end()
 
     compStream.write(componentTemplate)
