@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 module.exports.similarString = (str1, str2) => {}
 
 const colorMap = {
@@ -31,3 +34,26 @@ module.exports.consoleBlue = string => {
 }
 
 module.exports.colorMap = colorMap
+
+module.exports.writeFiles = (files) => new Promise(resolve => {
+  const directories = files.map(f => path.dirname(f[0]))
+
+  directories.forEach((dir) => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir)
+  })
+
+
+  const writeStream = (stream, content) => new Promise(res => {
+    stream.write(content)
+    stream.end()
+
+    stream.on('finish', () => res())
+  })
+
+  const promises = files.map(([directory, contents]) => {
+    const stream = fs.createWriteStream(directory)
+    return writeStream(stream, contents)
+  })
+
+  Promise.all(promises).then(resolve())
+})

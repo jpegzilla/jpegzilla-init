@@ -1,6 +1,6 @@
 const fs = require('fs')
 const dir = process.env.mode == 'dev' ? './tmp' : './'
-const { colorMap: cm } = require('./utils/utils')
+const { colorMap: cm, writeFiles } = require('./utils/utils')
 
 const gitignoreFile = require('./../templates/gitignore')
 const indexFile = require('./../templates/public/index')
@@ -37,6 +37,9 @@ const makeHTML = title => {
 }
 
 const makeConfigs = () => {
+  const files = [
+    [`${allDirs.root}/.babelrc`, babelRcFile]
+  ]
   const babelStream = fs.createWriteStream(`${allDirs.root}/.babelrc`)
   const gitignoreStream = fs.createWriteStream(`${allDirs.root}/.gitignore`)
   const prettierRcStream = fs.createWriteStream(`${allDirs.root}/.prettierrc`)
@@ -62,61 +65,27 @@ const makeConfigs = () => {
 
 // write all css
 const makeCSS = (css, vars, defaults) => {
-  // make the base css directory
   const cssDir = `${allDirs.styles}`
-
-  // make the components directory
   const compDir = `${cssDir}/components`
 
-  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
+  const writeAllCss = async (mainFile, varFile, defFile) => {
+    const files = [
+      [`${cssDir}/main.${css}`, mainFile],
+      [`${cssDir}/main.min.css`, mainMinCssFile],
+      [`${compDir}/${vars}`, varFile],
+      [`${compDir}/${defaults}`, defFile],
+    ]
 
-  const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`)
-  const mainMinStream = fs.createWriteStream(`${cssDir}/main.min.css`)
-  const varStream = fs.createWriteStream(`${compDir}/${vars}`)
-  const defStream = fs.createWriteStream(`${compDir}/${defaults}`)
+    return writeFiles(files)
+  }
 
-  if (css === 'scss') {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(mainScssFile)
-      mainStream.end()
-
-      mainMinStream.write(mainMinCssFile)
-      mainMinStream.end()
-
-      varStream.write(varsScssFile)
-      varStream.end()
-
-      defStream.write(defaultsScssFile)
-      defStream.end()
-
-      defStream.on('finish', () => resolve())
-    })
-  } else if (css === 'css') {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(mainCssFile)
-      mainStream.end()
-
-      varStream.write(varsCssFile)
-      varStream.end()
-
-      defStream.write(defaultsCssFile)
-      defStream.end()
-
-      defStream.on('finish', () => resolve())
-    })
-  } else if (css === 'sass') {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(mainSassFile)
-      mainStream.end()
-
-      varStream.write(varsSassFile)
-      varStream.end()
-
-      defStream.write(defaultsSassFile)
-      defStream.end()
-
-      defStream.on('finish', () => resolve())
-    })
+  switch (css) {
+    case 'css':
+      return writeAllCss(mainCssFile, varsCssFile, defaultsCssFile)
+    case 'scss':
+      return writeAllCss(mainScssFile, varsScssFile, defaultsScssFile)
+    case 'sass':
+      return writeAllCss(mainSassFile, varsSassFile, defaultsSassFile)
   }
 }
 
@@ -221,7 +190,7 @@ module.exports.makeReactProject = async options => {
     ])
       .then(() => {
         status = 'all done!'
-      })
-      .then(() => setTimeout(() => resolve(), 1000))
+        resolve()
+      }))
   })
 }

@@ -1,7 +1,7 @@
 const fs = require('fs')
 const empty = require('empty-folder')
 const dir = process.env.mode == 'dev' ? './tmp' : './'
-const { colorMap: cm } = require('./utils/utils')
+const { colorMap: cm, writeFiles } = require('./utils/utils')
 const confirmQuestion = require('./../index')
 
 const indexTemplate = require('./../templates/index')
@@ -44,35 +44,18 @@ const makeHTML = (title, modules) => {
 }
 
 const makeCSS = (css, vars, defaults) => {
-  // make the base css directory
   const cssDir = `${dir}/css`
-  if (!fs.existsSync(cssDir)) fs.mkdirSync(cssDir)
-
-  // make the components directory
   const compDir = `${cssDir}/components`
-  if (!fs.existsSync(compDir)) fs.mkdirSync(compDir)
 
-  const mainStream = fs.createWriteStream(`${cssDir}/main.${css}`)
-  const mainMinStream = fs.createWriteStream(`${cssDir}/main.min.css`)
-  const varStream = fs.createWriteStream(`${compDir}/${vars}`)
-  const defStream = fs.createWriteStream(`${compDir}/${defaults}`)
+  const writeAllCss = async (mainFile, varFile, defFile) => {
+    const files = [
+      [`${cssDir}/main.${css}`, mainFile],
+      [`${cssDir}/main.min.css`, mainMinCssFile],
+      [`${compDir}/${vars}`, varFile],
+      [`${compDir}/${defaults}`, defFile],
+    ]
 
-  const writeAllCss = (mainFile, varFile, defFile) => {
-    return new Promise((resolve, _reject) => {
-      mainStream.write(mainFile)
-      mainStream.end()
-
-      mainMinStream.write(mainMinCssFile)
-      mainMinStream.end()
-
-      varStream.write(varFile)
-      varStream.end()
-
-      defStream.write(defFile)
-      defStream.end()
-
-      defStream.on('finish', () => resolve())
-    })
+    return writeFiles(files)
   }
 
   switch (css) {
@@ -145,8 +128,8 @@ module.exports.makeWebComponentProject = async options => {
     ])
       .then(() => {
         status = 'all done!'
+        resolve()
       })
-      .then(() => setTimeout(() => resolve(), 1000))
   })
 }
 
