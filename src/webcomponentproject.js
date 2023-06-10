@@ -68,7 +68,7 @@ const makeCSS = (css, vars, defaults) => {
       // [`${cssDir}/main.min.css`, mainMinCssFile], // don't need this, let user compile when she wishes
       [`${varDir}/${vars}`, varFile],
       [`${varDir}/${defaults}`, defFile],
-      [`${compDir}.gitkeep`, ''],
+      [`${compDir}/.gitkeep`, ''],
     ]
 
     return writeFiles(files)
