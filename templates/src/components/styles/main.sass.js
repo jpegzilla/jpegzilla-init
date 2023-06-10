@@ -1,4 +1,1 @@
-module.exports = `// compile main
-
-@use 'components/defaults'
-`
+module.exports = `@use 'components/defaults'`

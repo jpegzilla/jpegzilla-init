@@ -29,9 +29,9 @@ const typeQuestion = () =>
   new Promise((resolve, reject) => {
     process.stdout.write(cm.fgCyan)
     rl.question(
-      'what type of project (vanilla / react / web component) would you like to make? (default: vanilla): ',
+      'what type of project (vanilla / react / web component) would you like to make? (default: web component): ',
       answer => {
-        let ans = answer ? answer : 'vanilla'
+        let ans = answer ? answer : 'web component'
         process.stdout.write(cm.reset)
         resolve(ans)
       }
@@ -52,9 +52,9 @@ const styleQuestion = () =>
   new Promise((resolve, _reject) => {
     process.stdout.write(cm.fgCyan)
     rl.question(
-      'would you like to use css, sass, or scss? (default: scss): ',
+      'would you like to use css, sass, or scss? (default: sass): ',
       answer => {
-        let ans = answer ? answer : 'scss'
+        let ans = answer ? answer : 'sass'
         process.stdout.write(cm.reset)
         resolve(ans)
       }
@@ -151,10 +151,10 @@ const main = async () => {
     // if "yes to all" argument is passed, set all values to default
     options = {
       title: 'index',
-      cssOption: 'scss',
+      cssOption: 'sass',
       modulesOrNot: true,
-      varsName: '_vars.scss',
-      defaultsName: '_defaults.scss',
+      varsName: '_vars.sass',
+      defaultsName: '_defaults.sass',
     }
 
     // show results
@@ -165,7 +165,7 @@ const main = async () => {
     cb('\t> document title: ')
     process.stdout.write(`${options.title}\r\n`)
 
-    cb('\t> css or scss: ')
+    cb('\t> sass, css, or scss: ')
     process.stdout.write(`${options.cssOption}\r\n`)
 
     cb('\t> use js native modules: ')
@@ -184,9 +184,9 @@ const main = async () => {
     // create react project
     options = {
       title: 'index',
-      cssOption: 'scss',
-      varsName: '_vars.scss',
-      defaultsName: '_defaults.scss',
+      cssOption: 'sass',
+      varsName: '_vars.sass',
+      defaultsName: '_defaults.sass',
     }
 
     makeReactProject(options).then(() => {
@@ -202,7 +202,7 @@ const main = async () => {
     cb('\t> document title: ')
     process.stdout.write(`${options.title}\r\n`)
 
-    cb('\t> css or scss: ')
+    cb('\t> sass, css, or scss: ')
     process.stdout.write(`${options.cssOption}\r\n`)
 
     cb('\t> name of css vars file: ')
@@ -218,10 +218,10 @@ const main = async () => {
     // if "yes to all" argument is passed, set all values to default
     options = {
       title: 'index',
-      cssOption: 'scss',
+      cssOption: 'sass',
       modulesOrNot: true,
-      varsName: '_vars.scss',
-      defaultsName: '_defaults.scss',
+      varsName: '_vars.sass',
+      defaultsName: '_defaults.sass',
     }
 
     makeWebComponentProject(options).then(() => {
@@ -237,7 +237,7 @@ const main = async () => {
     cb('\t> document title: ')
     process.stdout.write(`${options.title}\r\n`)
 
-    cb('\t> css or scss: ')
+    cb('\t> sass, css, or scss: ')
     process.stdout.write(`${options.cssOption}\r\n`)
 
     cb('\t> use js native modules: ')
@@ -267,7 +267,7 @@ const main = async () => {
       cssOption = await styleQuestion()
 
       while (!['css', 'scss', 'sass'].includes(cssOption.toLowerCase())) {
-        ce('please choose between scss and css.')
+        ce('please choose between scss, sass, and css.')
         cssOption = await styleQuestion()
       }
 
@@ -294,7 +294,7 @@ const main = async () => {
       cb('\t> document title: ')
       process.stdout.write(`${docTitle}\r\n`)
 
-      cb('\t> css or scss: ')
+      cb('\t> sass, css, or scss: ')
       process.stdout.write(`${cssOption}\r\n`)
 
       cb('\t> use js native modules: ')
@@ -341,7 +341,7 @@ const main = async () => {
       cb('\t> document title: ')
       process.stdout.write(`${docTitle}\r\n`)
 
-      cb('\t> css or scss: ')
+      cb('\t> sass, css, or scss: ')
       process.stdout.write(`${cssOption}\r\n`)
 
       cb('\t> name of css vars file: ')
@@ -364,7 +364,7 @@ const main = async () => {
       cssOption = await styleQuestion()
 
       while (!['css', 'scss', 'sass'].includes(cssOption.toLowerCase())) {
-        ce('please choose between scss and css.')
+        ce('please choose between sass, scss and css.')
         cssOption = await styleQuestion()
       }
 
@@ -391,7 +391,7 @@ const main = async () => {
       cb('\t> document title: ')
       process.stdout.write(`${docTitle}\r\n`)
 
-      cb('\t> css or scss: ')
+      cb('\t> sass, css, or scss: ')
       process.stdout.write(`${cssOption}\r\n`)
 
       cb('\t> use js native modules: ')

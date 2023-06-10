@@ -1,7 +1,9 @@
-module.exports = `console.log('hello from the main file!')
+module.exports = `import { State } from './utils/index.mjs'
+import elements from './components/index.mjs'
 
-const elements = []
+export const state = new State()
 
 elements.forEach(({ name, element }) => {
   if (name && element) customElements.define(name, element)
-})`
+})
+`

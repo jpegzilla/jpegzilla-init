@@ -6,7 +6,11 @@ const confirmQuestion = require('./../index')
 
 const indexTemplate = require('./../templates/index')
 const componentTemplate = require('./../templates/src/components/component')
+const componentIndexTemplate = require('./../templates/src/components/index')
+const stateTemplate = require('./../templates/src/utils/state-wc')
+const utilsIndexTemplate = require('./../templates/src/utils/index')
 const prettierTemplate = require('./../templates/prettierrc')
+const gitignoreTemplate = require('./../templates/gitignore-wc')
 const mainJsFile = require('./../templates/main-wc')
 
 const mainScssFile = require('./../templates/src/components/styles/main.scss')
@@ -33,6 +37,16 @@ const makePrettier = () => {
   })
 }
 
+const makeGitignore = () => {
+  const stream = fs.createWriteStream(`${dir}/.gitignore`)
+  return new Promise((resolve, _reject) => {
+    stream.write(gitignoreTemplate)
+    stream.end()
+
+    stream.on('finish', () => resolve())
+  })
+}
+
 const makeHTML = (title, modules) => {
   const stream = fs.createWriteStream(`${dir}/index.html`)
   return new Promise((resolve, _reject) => {
@@ -46,13 +60,15 @@ const makeHTML = (title, modules) => {
 const makeCSS = (css, vars, defaults) => {
   const cssDir = `${dir}/css`
   const compDir = `${cssDir}/components`
+  const varDir = `${cssDir}/utils`
 
   const writeAllCss = async (mainFile, varFile, defFile) => {
     const files = [
       [`${cssDir}/main.${css}`, mainFile],
-      [`${cssDir}/main.min.css`, mainMinCssFile],
-      [`${compDir}/${vars}`, varFile],
-      [`${compDir}/${defaults}`, defFile],
+      // [`${cssDir}/main.min.css`, mainMinCssFile], // don't need this, let user compile when she wishes
+      [`${varDir}/${vars}`, varFile],
+      [`${varDir}/${defaults}`, defFile],
+      [`${compDir}.gitkeep`, ''],
     ]
 
     return writeFiles(files)
@@ -71,20 +87,54 @@ const makeCSS = (css, vars, defaults) => {
 const makeJS = modules => {
   const jsDir = `${dir}/js`
   const jsCompDir = `${dir}/js/components`
+  const jsUtilDir = `${dir}/js/utils`
   if (!fs.existsSync(jsDir)) fs.mkdirSync(jsDir)
   if (!fs.existsSync(jsCompDir)) fs.mkdirSync(jsCompDir)
+  if (!fs.existsSync(jsUtilDir)) fs.mkdirSync(jsUtilDir)
 
-  const stream = fs.createWriteStream(`${jsDir}/main.${modules ? 'mjs' : 'js'}`)
-  const compStream = fs.createWriteStream(`${jsCompDir}/component.${modules ? 'mjs' : 'js'}`)
+  const ext = modules ? 'mjs' : 'js'
 
-  return new Promise((resolve, _reject) => {
-    stream.write(mainJsFile)
-    stream.end()
+  const stream = fs.createWriteStream(`${jsDir}/main.${ext}`)
+  const compStream = fs.createWriteStream(`${jsCompDir}/component.${ext}`)
+  const compIndexStream = fs.createWriteStream(`${jsCompDir}/index.${ext}`)
+  const stateStream = fs.createWriteStream(`${jsUtilDir}/state.${ext}`)
+  const utilsIndexStream = fs.createWriteStream(`${jsUtilDir}/index.${ext}`)
 
-    compStream.write(componentTemplate)
-    stream.end()
+  const tasks = [
+    new Promise(resolve => {
+      stream.write(mainJsFile)
+      stream.end()
 
-    stream.on('finish', () => resolve())
+      stream.on('finish', resolve)
+    }),
+    new Promise(resolve => {
+      compStream.write(componentTemplate)
+      compStream.end()
+
+      compStream.on('finish', resolve)
+    }),
+    new Promise(resolve => {
+      stateStream.write(stateTemplate)
+      stateStream.end()
+
+      stateStream.on('finish', resolve)
+    }),
+    new Promise(resolve => {
+      compIndexStream.write(componentIndexTemplate)
+      compIndexStream.end()
+
+      compIndexStream.on('finish', resolve)
+    }),
+    new Promise(resolve => {
+      utilsIndexStream.write(utilsIndexTemplate)
+      utilsIndexStream.end()
+
+      utilsIndexStream.on('finish', resolve)
+    })
+  ]
+
+  return new Promise((resolve) => {
+    Promise.all(tasks).then(resolve)
   })
 }
 
@@ -125,6 +175,7 @@ module.exports.makeWebComponentProject = async options => {
       makeCSS(css, vars, defaults),
       makeJS(modules),
       makePrettier(),
+      makeGitignore(),
     ])
       .then(() => {
         status = 'all done!'

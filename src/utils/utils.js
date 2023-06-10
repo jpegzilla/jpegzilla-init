@@ -50,7 +50,8 @@ module.exports.writeFiles = (files) => new Promise(resolve => {
     stream.on('finish', () => res())
   })
 
-  const promises = files.map(([directory, contents]) => {
+  const promises = files.filter(e => !!e[1]).map(([directory, contents]) => {
+
     const stream = fs.createWriteStream(directory)
     return writeStream(stream, contents)
   })
