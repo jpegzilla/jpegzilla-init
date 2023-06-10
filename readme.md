@@ -76,14 +76,20 @@ generates this (with some variation depending on your choices):
 root
 ├── css
 │   ├── components
+│   ├── utils
 │   │   ├── _defaults.sass
 │   │   └── _var.sass
 │   └── main.sass
 ├── js
 │   ├── components
-│   │   └── component.mjs
+│   │   ├── component.mjs
+│   │   └── index.mjs
+│   ├── utils
+│   │   ├── index.mjs
+│   │   └── state.mjs
 │   └── main.mjs
 ├── index.html
+├── .gitignore
 └── .prettierrc
 ```
 
