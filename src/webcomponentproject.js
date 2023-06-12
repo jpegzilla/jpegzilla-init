@@ -12,6 +12,7 @@ const utilsIndexTemplate = require('./../templates/src/utils/index')
 const prettierTemplate = require('./../templates/prettierrc')
 const gitignoreTemplate = require('./../templates/gitignore-wc')
 const mainJsFile = require('./../templates/main-wc')
+const packageJsonWCTemplate = require('./../templates/package.json-wc')
 
 const mainScssFile = require('./../templates/src/components/styles/main.scss')
 const varsScssFile = require('./../templates/src/components/styles/_vars.scss')
@@ -41,6 +42,16 @@ const makeGitignore = () => {
   const stream = fs.createWriteStream(`${dir}/.gitignore`)
   return new Promise((resolve, _reject) => {
     stream.write(gitignoreTemplate)
+    stream.end()
+
+    stream.on('finish', () => resolve())
+  })
+}
+
+const makePackageJson = () => {
+  const stream = fs.createWriteStream(`${dir}/package.json`)
+  return new Promise((resolve, _reject) => {
+    stream.write(packageJsonWCTemplate)
     stream.end()
 
     stream.on('finish', () => resolve())
@@ -176,6 +187,7 @@ module.exports.makeWebComponentProject = async options => {
       makeJS(modules),
       makePrettier(),
       makeGitignore(),
+      makePackageJson()
     ])
       .then(() => {
         status = 'all done!'

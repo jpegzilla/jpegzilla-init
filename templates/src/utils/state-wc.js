@@ -43,14 +43,16 @@ module.exports = `class Minerva {
  */
 class State {
   constructor(key) {
-    if (key.replace(/\s/gi, '').trim() != key) {
+    if (!key || key.replace(/\s/gi, '').trim() != key) {
       throw new SyntaxError('invalid minerva key format')
     }
 
-    this.events = {}
-    this.temp = {}
-    this.key = key
-    this.store = this.load() || {}
+    if (key) {
+      this.events = {}
+      this.temp = {}
+      this.key = key
+      this.store = this.load() || {}
+    }
   }
 
   get audio() {

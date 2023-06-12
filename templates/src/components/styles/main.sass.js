@@ -1,1 +1,1 @@
-module.exports = `@use 'components/defaults'`
+module.exports = `@use 'utils/defaults'`

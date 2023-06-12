@@ -1,4 +1,5 @@
 module.exports = `@use 'vars' as v
+@use 'sass:color' as c
 
 *
   margin: 0
